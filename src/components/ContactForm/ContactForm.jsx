@@ -1,23 +1,48 @@
-import React from 'react';
+import React, { Component } from 'react';
 
-const ContactForm = ({ name, onNameChange, onSubmit }) => {
-  return (
-    <form onSubmit={onSubmit}>
-      <label>
-        Name:
+class ContactForm extends Component {
+  state = {
+    name: '',
+    number: '',
+  };
+
+  onHandleChange = event => {
+    const { name, value } = event.target;
+    this.setState({ [name]: value });
+  };
+
+  onHandleSubmit = event => {
+    event.preventDefault();
+    const { name, number } = this.state;
+    this.props.onAddContact(name, number);
+    this.setState({ name: '', number: '' });
+  };
+
+  render() {
+    const { name, number } = this.state;
+
+    return (
+      <form onSubmit={this.onHandleSubmit}>
         <input
           type="text"
           name="name"
-          pattern="^[a-zA-Zа-яА-Я]+(([' -][a-zA-Zа-яА-Я ])?[a-zA-Zа-яА-Я]*)*$"
-          title="Name may contain only letters, apostrophe, dash and spaces. For example Adrian, Jacob Mercer, Charles de Batz de Castelmore d'Artagnan"
-          required
+          placeholder="Name"
           value={name}
-          onChange={onNameChange}
+          onChange={this.onHandleChange}
+          required
         />
-      </label>
-      <button type="submit">Add Contact</button>
-    </form>
-  );
-};
+        <input
+          type="tel"
+          name="number"
+          placeholder="Phone number"
+          value={number}
+          onChange={this.onHandleChange}
+          required
+        />
+        <button type="submit">Add contact</button>
+      </form>
+    );
+  }
+}
 
 export default ContactForm;

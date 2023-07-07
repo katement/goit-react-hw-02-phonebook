@@ -1,49 +1,71 @@
-import { useState } from 'react';
-import ReactDOM from 'react-dom';
+import React, { Component } from 'react';
 import ContactForm from './ContactForm/ContactForm';
 import ContactList from './ContactList/ContactList';
 import { nanoid } from 'nanoid';
-export class App extends Component {
+import Filter from './Filter/Filter';
+
+class App extends Component {
   state = {
     contacts: [],
-    name: '',
+    filter: '',
+  };
+
+  onHandleAddContact = (name, number) => {
+    const { contacts } = this.state;
+    const existingContact = contacts.find(
+      contact => contact.name.toLowerCase() === name.toLowerCase()
+    );
+    if (existingContact) {
+      alert(`${name} is already in contacts`);
+      return;
+    }
+
+    const newContact = {
+      id: nanoid(),
+      name,
+      number,
+    };
+
+    this.setState(prevState => ({
+      contacts: [...prevState.contacts, newContact],
+    }));
+  };
+
+  onHandleDeleteContact = contactId => {
+    this.setState(prevState => ({
+      contacts: prevState.contacts.filter(contact => contact.id !== contactId),
+    }));
+  };
+
+  onHandleFilterChange = event => {
+    this.setState({ filter: event.target.value });
+  };
+
+  getFilteredContacts = () => {
+    const { contacts, filter } = this.state;
+    return contacts.filter(contact =>
+      contact.name.toLowerCase().includes(filter.toLowerCase())
+    );
   };
 
   render() {
-    const [contacts, setContacts] = useState([]);
-    const [name, setName] = useState('');
-
-    const handleNameChange = event => {
-      setName(event.target.value);
-    };
-
-    const handleSubmit = event => {
-      event.preventDefault();
-      if (name.trim() === '') {
-        return;
-      }
-      const newContact = {
-        id: nanoid(),
-        name: name.trim(),
-      };
-      setContacts([...contacts, newContact]);
-      setName('');
-    };
+    const { filter } = this.state;
+    const filteredContacts = this.getFilteredContacts();
 
     return (
       <div>
-        <h1>Contact Book</h1>
-        <ContactForm
-          name={name}
-          onNameChange={handleNameChange}
-          onSubmit={handleSubmit}
+        <h1>Phonebook</h1>
+        <ContactForm onAddContact={this.onHandleAddContact} />
+
+        <h2>Contacts</h2>
+        <Filter value={filter} onChange={this.onHandleFilterChange} />
+        <ContactList
+          contacts={filteredContacts}
+          onDeleteContact={this.onHandleDeleteContact}
         />
-        <ContactList contacts={contacts} />
       </div>
     );
   }
 }
-
-ReactDOM.render(<App />, document.getElementById('root'));
 
 export default App;
